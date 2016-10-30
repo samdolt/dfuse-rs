@@ -58,6 +58,9 @@ impl DfuseFile {
         let prefix = Prefix::new(self.size() as u32, self.images.len() as u8);
         try!(prefix.write_to(&mut buf));
 
+        for ref image in &self.images {
+            try!(image.write_to(&mut buf));
+        }
         Ok(())
     }
 }

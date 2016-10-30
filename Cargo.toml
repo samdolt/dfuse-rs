@@ -1,0 +1,8 @@
+[package]
+name = "dfuse"
+version = "0.1.0"
+authors = ["Samuel Dolt <samuel@dolt.ch>"]
+
+[dependencies]
+byteorder = "0.5.3"
+log = "0.3.6"

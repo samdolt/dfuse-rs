@@ -32,10 +32,12 @@
 // #![deny(warnings)]
 
 extern crate byteorder;
+extern crate crc;
+
 mod file;
 pub use file::DfuseFile;
 
-pub mod elements;
+mod elements;
 
 #[cfg(test)]
 mod tests {

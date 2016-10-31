@@ -44,7 +44,7 @@ mod tests {
     use super::*;
 
     fn assert_write_reported_size(data: Vec<u8>) {
-        let element = ImageElement::new(0xAABBCCDDEE, data);
+        let element = ImageElement::new(0xAABBCCDD, data);
         let reported = element.size();
         let mut buf: Vec<u8> = Vec::with_capacity(reported);
         element.write_to(&mut buf).unwrap();

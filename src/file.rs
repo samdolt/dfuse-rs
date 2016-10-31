@@ -9,7 +9,14 @@
 // except according to those terms.
 
 use ::elements::*;
-use ::std::io::{Write, Result};
+
+use ::std::io::Write;
+use ::std::io::BufWriter;
+use ::std::io::Result;
+
+use ::crc::crc32::Digest;
+use ::crc::crc32::IEEE;
+use ::crc::Hasher32;
 
 /// A struct representing a DFU file
 ///
@@ -54,13 +61,20 @@ impl DfuseFile {
         self.images.iter().fold(Prefix::size() + Suffix::size(), |sum, x| sum + x.size())
     }
 
-    pub fn write_to<T: Write>(&self, mut buf: &mut T) -> Result<()> {
+    pub fn write_to<T: Write>(&self, buf: &mut T) -> Result<()> {
+        let mut buf = BufWriter::new(buf);
+        let mut digest = Digest::new(IEEE);
+        let mut data: Vec<u8> = Vec::with_capacity(self.size());
+
         let prefix = Prefix::new(self.size() as u32, self.images.len() as u8);
-        try!(prefix.write_to(&mut buf));
+        try!(prefix.write_to(&mut data));
 
         for ref image in &self.images {
-            try!(image.write_to(&mut buf));
+            try!(image.write_to(&mut data));
         }
+
+        digest.write(&data);
+        try!(buf.write_all(&data));
         Ok(())
     }
 }

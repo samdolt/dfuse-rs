@@ -8,17 +8,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-mod prefix;
-pub use self::prefix::Prefix;
+pub struct Suffix;
 
-mod target_prefix;
-pub use self::target_prefix::TargetPrefix;
-
-mod image_element;
-pub use self::image_element::ImageElement;
-
-mod image;
-pub use self::image::Image;
-
-mod suffix;
-pub use self::suffix::Suffix;
+// Warning: Suffix use Little Endian
+impl Suffix {
+    pub fn size() -> usize {
+        16
+    }
+}

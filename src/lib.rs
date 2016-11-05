@@ -8,28 +8,31 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! # DfuSe library for Rust
+//! # `DfuSe` library for Rust
 //!
-//! This library can read and write DfuSe file `file.dfu`
+//! This library can read and write `DfuSe` file `file.dfu`
 //!
-//! ## What is DfuSe
+//! ## What is `DfuSe`
 //!
 //! `DfuSe` is an acronym for `DFU STMicroelectronics Extension`
 //!
-//! ## What is DFU
+//! ## What is `DFU`
 //!
 //! `DFU` is an acronym for `Device Firmware Upgrade`. It's a standard USB protocol
 //! to upgrade device.
 //!
 //! # Resources
 //!
-//! Useful ressource about DfuSe:
+//! Useful ressource about `DfuSe`:
 //!
-//! - DfuSe File Format Specification Rev 1: [link](http://rc.fdr.hu/UM0391.pdf)
+//! - `DfuSe` File Format Specification Rev 1: [link](http://rc.fdr.hu/UM0391.pdf)
 //! - USB Device Class Specification for DFU V 1.1: [link](http://www.usb.org/developers/docs/devclass_docs/DFU_1.1.pdf)
 
 // #![deny(missing_docs)]
 // #![deny(warnings)]
+
+// #![cfg(feature="nightly")]
+// #![feature(test)]
 
 extern crate byteorder;
 extern crate crc;
@@ -37,7 +40,10 @@ extern crate crc;
 mod file;
 pub use file::DfuseFile;
 
+mod tools;
+
 mod elements;
+
 
 #[cfg(test)]
 mod tests {

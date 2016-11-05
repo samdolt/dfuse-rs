@@ -38,7 +38,7 @@ impl TargetPrefix {
 
     pub fn write_to<T: WriteBytesExt>(&self, buf: &mut T) -> Result<()> {
         let signature: [u8; 6] = [b'T', b'a', b'r', b'g', b'e', b't'];
-        for byte in signature.iter() {
+        for byte in &signature {
             try!(buf.write_u8(byte.clone()));
         }
         try!(buf.write_u8(self.alternate));

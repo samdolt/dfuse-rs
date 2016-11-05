@@ -11,12 +11,12 @@
 use ::elements::*;
 
 use ::std::io::Write;
-use ::std::io::BufWriter;
+use ::tools::BufWriterWithCRC;
 use ::std::io::Result;
 
-use ::crc::crc32::Digest;
-use ::crc::crc32::IEEE;
-use ::crc::Hasher32;
+use ::byteorder::LittleEndian;
+
+const CRC_SIZE: usize = 0x4;
 
 /// A struct representing a DFU file
 ///
@@ -33,12 +33,16 @@ use ::crc::Hasher32;
 /// ```
 pub struct DfuseFile {
     images: Vec<Image>,
+    suffix: Suffix,
 }
 
 impl DfuseFile {
     /// Create an empty `DfuseFile`
     pub fn new() -> DfuseFile {
-        DfuseFile { images: Vec::new() }
+        DfuseFile {
+            images: Vec::new(),
+            suffix: Suffix::new(),
+        }
     }
 
     /// Add a unamed binary image
@@ -58,23 +62,28 @@ impl DfuseFile {
     }
 
     pub fn size(&self) -> usize {
-        self.images.iter().fold(Prefix::size() + Suffix::size(), |sum, x| sum + x.size())
+
+        self.images.iter().fold(Prefix::size() + Suffix::size() + CRC_SIZE,
+                                |sum, x| sum + x.size())
     }
 
     pub fn write_to<T: Write>(&self, buf: &mut T) -> Result<()> {
-        let mut buf = BufWriter::new(buf);
-        let mut digest = Digest::new(IEEE);
-        let mut data: Vec<u8> = Vec::with_capacity(self.size());
+        let mut buf = BufWriterWithCRC::new(buf);
 
         let prefix = Prefix::new(self.size() as u32, self.images.len() as u8);
-        try!(prefix.write_to(&mut data));
+        try!(prefix.write_to(&mut buf));
 
-        for ref image in &self.images {
-            try!(image.write_to(&mut data));
+        for image in &self.images {
+            try!(image.write_to(&mut buf));
         }
 
-        digest.write(&data);
-        try!(buf.write_all(&data));
+        try!(suffix.write_to(&mut buf));
+
+        // CRC is documented in the suffix section as a little endian 32bit unsigned integer
+        try!(buf.write_crc::<LittleEndian>());
+
+        try!(buf.flush());
+
         Ok(())
     }
 }
@@ -83,6 +92,7 @@ impl DfuseFile {
 mod tests {
 
     use super::*;
+
 
     #[test]
     fn can_create_empty_file() {

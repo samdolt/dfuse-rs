@@ -36,7 +36,7 @@ impl Image {
                                        self.elements.len() as u32);
         try!(target.write_to(buf));
 
-        for ref element in &self.elements {
+        for element in &self.elements {
             try!(element.write_to(buf));
         }
         Ok(())

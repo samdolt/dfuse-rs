@@ -1,0 +1,11 @@
+[package]
+name = "dfuse_capi"
+version = "0.1.0"
+authors = ["Samuel Dolt <samuel@dolt.ch>"]
+
+[dependencies]
+dfuse = {  path = "../" }
+
+
+[lib]
+crate-type = ["dylib", "staticlib"]

@@ -8,4 +8,11 @@ dfuse = {  path = "../" }
 
 
 [lib]
-crate-type = ["dylib", "staticlib"]
+crate-type = ["cdylib", "staticlib"]
+
+[profile.release]
+lto = true
+panic = 'abort'
+
+[profile.dev]
+panic = 'abort'

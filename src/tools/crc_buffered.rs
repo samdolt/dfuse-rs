@@ -11,40 +11,51 @@
 use std::io::BufWriter;
 use std::io::Write;
 use std::io::Result;
-use crc::{crc32, Hasher32};
 use byteorder::ByteOrder;
+use ::tools::CRC32;
 
 pub struct BufWriterWithCRC<W: Write> {
     buf: BufWriter<W>,
-    digest: crc32::Digest,
+    crc: CRC32,
 }
 
 impl<W: Write> BufWriterWithCRC<W> {
     pub fn new(inner: W) -> BufWriterWithCRC<W> {
         BufWriterWithCRC {
             buf: BufWriter::new(inner),
-            digest: crc32::Digest::new(crc32::IEEE),
+            crc: CRC32::new_jam(),
         }
     }
 
     #[inline]
     pub fn write_crc<T: ByteOrder>(&mut self) -> Result<()> {
         let mut buf = [0; 4];
-        T::write_u32(&mut buf, self.digest.sum32());
+        T::write_u32(&mut buf, self.crc.get_and_reset());
         self.buf.write_all(&buf)
     }
 
     #[inline]
     pub fn reset_crc(&mut self) {
-        self.digest.reset();
+        self.crc.reset();
     }
 }
 
 impl<W: Write> Write for BufWriterWithCRC<W> {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> Result<usize> {
-        self.digest.write(buf);
-        self.buf.write(buf)
+        let res = self.buf.write(buf);
+
+        match &res {
+            &Ok(i) => {
+                for b in &buf[0..i] {
+                    self.crc.add(*b);
+                }
+            }
+
+            _ => {}
+        }
+
+        res
     }
 
     #[inline]

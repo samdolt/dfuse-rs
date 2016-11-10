@@ -45,6 +45,23 @@ impl DfuseFile {
         }
     }
 
+    /// Add a named binary image
+    pub fn add_image(&mut self, name: &str, alternate: u8, start_adress: u32, data: Vec<u8>) {
+        let element = ImageElement {
+            start_adress: start_adress,
+            data: data,
+        };
+
+        let image = Image {
+            name: Some(name.to_string()),
+            alternate: alternate,
+            elements: vec![element],
+        };
+
+        self.images.push(image);
+
+    }
+
     /// Add a unamed binary image
     pub fn add_unamed_image(&mut self, alternate: u8, start_adress: u32, data: Vec<u8>) {
         let element = ImageElement {
@@ -59,6 +76,18 @@ impl DfuseFile {
         };
 
         self.images.push(image);
+    }
+
+    pub fn set_vendor_id(&mut self, vid: u16) {
+        self.suffix.usb_vid = vid;
+    }
+
+    pub fn set_product_id(&mut self, pid: u16) {
+        self.suffix.usb_pid = pid;
+    }
+
+    pub fn set_version(&mut self, ver: u16) {
+        self.suffix.fw_version = ver;
     }
 
     pub fn size(&self) -> usize {
@@ -77,7 +106,7 @@ impl DfuseFile {
             try!(image.write_to(&mut buf));
         }
 
-        try!(suffix.write_to(&mut buf));
+        try!(self.suffix.write_to(&mut buf));
 
         // CRC is documented in the suffix section as a little endian 32bit unsigned integer
         try!(buf.write_crc::<LittleEndian>());

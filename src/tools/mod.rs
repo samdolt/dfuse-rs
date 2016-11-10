@@ -10,3 +10,6 @@
 
 mod crc_buffered;
 pub use self::crc_buffered::*;
+
+mod crc;
+pub use self::crc::*;
